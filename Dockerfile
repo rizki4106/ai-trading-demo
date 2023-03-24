@@ -6,4 +6,6 @@ COPY  . .
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-CMD streamlit run model_1.py --server.port $PORT
+EXPOSE 8501
+
+ENTRYPOINT [ "streamlit", "run", "model_1.py", "--server.port=8501", "--server.adress=0.0.0.0" ]
