@@ -69,6 +69,9 @@ with st.spinner("mohon tunggu sedang melakukan backward test..."):
     ticker = yf.Ticker('BTC-USD')
     data = ticker.history(period="7d", interval="15m")
 
+    st.write("BTC/USD")
+    st.write("period `7d` interval `15m`")
+    
     # create annotation
     annotation = visualize_result(data=data, n_candle=12, class_name={0: "sell", 1 : "buy"})
     fig = go.Figure(data=[go.Candlestick(x=data.index,
