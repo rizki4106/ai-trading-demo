@@ -85,7 +85,7 @@ def visualize_result(data : pd.DataFrame, n_candle: int, class_name : dict):
     # buat titik anotasi untuk menulis buy or sell
     annts = []
 
-    for pr, po in zip(preds, points):
+    for i, (pr, po) in enumerate(zip(preds, points)):
 
         ann = dict(x=data.index[po],
                    y=data['High'][po],
@@ -95,7 +95,7 @@ def visualize_result(data : pd.DataFrame, n_candle: int, class_name : dict):
                    arrowhead=7,
                    ax=0,
                    ay=-40 if pr == 1 else 40,
-                   text=class_name[pr])
+                   text=f'class_name[pr] - {i + 1}')
 
         annts.append(ann)
     
