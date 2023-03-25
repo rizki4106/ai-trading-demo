@@ -3,6 +3,18 @@ import numpy as np
 from PIL import Image
 import pandas as pd
 
+# ml
+from core.controller import predict, device_diagnostic
+from core.model import initialize_model_v1
+
+# device diagnostic
+device = device_diagnostic()
+
+# initialize trained model
+model_path = "model/model-1.pth"
+model = initialize_model_v1(device=device, saved_weight_path=model_path)
+model.eval()
+
 class DataCreation:
   """
   This class used for create data needs
@@ -64,7 +76,8 @@ def visualize_result(data : pd.DataFrame, n_candle: int, class_name : dict):
         img = data_creation.create_image(group.iloc[:, :-2])
 
         # lakukan prediksi disini
-        preds.append(1)
+        prob, c = predict(model=model, image=img, device=device)
+        preds.append(c)
         
     # menentukan titik candle stick untuk ditampilkan buy atau sell
     points = np.arange(n_candle, int(len(data)), n_candle)
