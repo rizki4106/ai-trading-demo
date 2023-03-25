@@ -95,7 +95,7 @@ def visualize_result(data : pd.DataFrame, n_candle: int, class_name : dict):
                    arrowhead=7,
                    ax=0,
                    ay=-40 if pr == 1 else 40,
-                   text=f'class_name[pr] - {i + 1}')
+                   text=f'{class_name[pr]} - {i + 1}')
 
         annts.append(ann)
     
