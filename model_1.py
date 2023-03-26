@@ -1,20 +1,38 @@
 import streamlit as st
 from PIL import Image
 import pandas as pd
-from core.model import initialize_model_v1
-from core.controller import predict, device_diagnostic
-from core.data import visualize_result
+# from core.model import initialize_model_v1
+from core.controller import device_diagnostic
+# from core.data import visualize_result
 import yfinance as yf
 import plotly.graph_objects as go
 
 # new code
 from core.ai import ConfirmModelV1
+from core.tester import TraderTester
 
 # device diagnostic
 device = device_diagnostic()
 
-# initialize trained model
+# get live data
+# get data 
+ticker = yf.Ticker('BTC-USD')
+data = ticker.history(period="7d", interval="15m")
 
+# initialize trained model
+# initialize model
+m1 = ConfirmModelV1(state_dict_path="./model/model-1.pth",
+                    device=device_diagnostic(),
+                    class_name={0: "sell", 1 : "buy"})
+
+# initialize tester
+tester = TraderTester(
+    historical_data=data.iloc[-50:, :],
+    n_candle=12,
+    model=m1,
+)
+
+# content
 st.sidebar.markdown("# Model 1")
 st.sidebar.markdown("dilatih menggunakan data `up` dan `down`")
 
@@ -46,11 +64,6 @@ st.markdown("## Prediksi")
 # upload image
 uploaded_image = st.file_uploader("Upload Gambar Chart Pattern", type=["png", "jpg", "jpeg"])
 
-# initialize model
-m1 = ConfirmModelV1(state_dict_path="./model/model-1.pth",
-                    device=device_diagnostic(),
-                    class_name={0: "sell", 1 : "buy"})
-
 if uploaded_image is not None:
 
     # read image
@@ -67,23 +80,23 @@ if uploaded_image is not None:
     st.markdown(f"File `{uploaded_image.name}` terdeteksi sebagai trend `{res['class_name']}` dengan probabilitas `{res['probability']:.5f}`")
 
 
-# st.markdown("## Backward Test")
+st.markdown("## Backward Test")
 
-# with st.spinner("mohon tunggu sedang melakukan backward test..."):
-#     # get data 
-#     ticker = yf.Ticker('BTC-USD')
-#     data = ticker.history(period="7d", interval="15m")
+with st.spinner("mohon tunggu sedang melakukan backward test..."):
+    
 
-#     st.write("BTC-USD")
-#     st.write("period `7d` interval `15m`")
+    st.write("BTC-USD")
+    st.write("period `7d` interval `15m`")
 
-#     # create annotation
-#     annotation = visualize_result(data=data, n_candle=12, class_name={0: "sell", 1 : "buy"})
-#     fig = go.Figure(data=[go.Candlestick(x=data.index,
-#                                         open=data['Open'],
-#                                         high=data['High'],
-#                                         low=data['Low'],
-#                                         close=data['Close'])])
-#     fig.update_layout(annotations=annotation, height=800)
+    # create annotation
+    annotation = tester.back_test()
 
-#     st.plotly_chart(fig)
+    data = data.iloc[-50:, :-2]
+    fig = go.Figure(data=[go.Candlestick(x=data.index,
+                                        open=data['Open'],
+                                        high=data['High'],
+                                        low=data['Low'],
+                                        close=data['Close'])])
+    fig.update_layout(annotations=annotation, height=800)
+
+    st.plotly_chart(fig)
