@@ -7,13 +7,13 @@ from core.data import visualize_result
 import yfinance as yf
 import plotly.graph_objects as go
 
+# new code
+from core.ai import ConfirmModelV1
+
 # device diagnostic
 device = device_diagnostic()
 
 # initialize trained model
-class_name = {0: "down", 1: "up"}
-model_path = "./model/model-1.pth"
-model = initialize_model_v1(device=device, saved_weight_path=model_path)
 
 st.sidebar.markdown("# Model 1")
 st.sidebar.markdown("dilatih menggunakan data `up` dan `down`")
@@ -46,6 +46,11 @@ st.markdown("## Prediksi")
 # upload image
 uploaded_image = st.file_uploader("Upload Gambar Chart Pattern", type=["png", "jpg", "jpeg"])
 
+# initialize model
+m1 = ConfirmModelV1(state_dict_path="./model/model-1.pth",
+                    device=device_diagnostic(),
+                    class_name={0: "sell", 1 : "buy"})
+
 if uploaded_image is not None:
 
     # read image
@@ -56,29 +61,29 @@ if uploaded_image is not None:
 
     # lakukan prediksi disini
 
-    prob, classes = predict(model=model, image=img, device=device)
+    res = m1.predict(image=img)
 
     st.image(img)
-    st.markdown(f"File `{uploaded_image.name}` terdeteksi sebagai trend `{class_name[classes]}` dengan probabilitas `{prob:.5f}`")
+    st.markdown(f"File `{uploaded_image.name}` terdeteksi sebagai trend `{res['class_name']}` dengan probabilitas `{res['probability']:.5f}`")
 
 
-st.markdown("## Backward Test")
+# st.markdown("## Backward Test")
 
-with st.spinner("mohon tunggu sedang melakukan backward test..."):
-    # get data 
-    ticker = yf.Ticker('BTC-USD')
-    data = ticker.history(period="7d", interval="15m")
+# with st.spinner("mohon tunggu sedang melakukan backward test..."):
+#     # get data 
+#     ticker = yf.Ticker('BTC-USD')
+#     data = ticker.history(period="7d", interval="15m")
 
-    st.write("BTC-USD")
-    st.write("period `7d` interval `15m`")
+#     st.write("BTC-USD")
+#     st.write("period `7d` interval `15m`")
 
-    # create annotation
-    annotation = visualize_result(data=data, n_candle=12, class_name={0: "sell", 1 : "buy"})
-    fig = go.Figure(data=[go.Candlestick(x=data.index,
-                                        open=data['Open'],
-                                        high=data['High'],
-                                        low=data['Low'],
-                                        close=data['Close'])])
-    fig.update_layout(annotations=annotation, height=800)
+#     # create annotation
+#     annotation = visualize_result(data=data, n_candle=12, class_name={0: "sell", 1 : "buy"})
+#     fig = go.Figure(data=[go.Candlestick(x=data.index,
+#                                         open=data['Open'],
+#                                         high=data['High'],
+#                                         low=data['Low'],
+#                                         close=data['Close'])])
+#     fig.update_layout(annotations=annotation, height=800)
 
-    st.plotly_chart(fig)
+#     st.plotly_chart(fig)
