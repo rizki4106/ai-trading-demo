@@ -26,6 +26,8 @@ with st.spinner("Menjalankan prediksi..."):
     # membuat anotasi
     annt_point = annotate(annotation, prediction, data, cs.rule_name)
 
+    st.markdown("BTC-USD periode `7 hari` rentang waktu `15 menit`")
+
     # plot candle stick kedalam chart
     fig = go.Figure(data=[go.Candlestick(x=data.index,
                                         open=data['Open'],
