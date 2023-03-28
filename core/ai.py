@@ -85,3 +85,107 @@ class ConfirmModelV1:
                 "class_int": idx,
                 "class_name": self.class_name[idx]
             }
+
+class CandleStick:
+
+    # define rule name in dictionary
+    rule_name = {
+        0: "sell",
+        1: "buy",
+        2: "do nothing",
+    }
+
+    # define candle stick name in dictionary
+    candlestick_name = {
+        0: "bearish",
+        1: "bullish",
+    }
+
+    def candlestick_type(self, df):
+        """
+        Given a candlestick dataframe return the type of candlestick
+        
+        @param df - dataframe with columns Close Open Low High High.
+        """
+        if df['Close'] < df['Open']:
+            return 0
+        elif df['Close'] > df['Open']:
+            return 1
+    
+    def do_transaction(self, frame):
+        """
+        If 3 candle stick detected as bearish, bullish, bullish then buy
+        If 3 candle stick detected as bullish, bearish, bearish then sell
+
+        @param frame - dataframe with 3 rows and columns Close Open Low High High.
+        @return dected_action -> 0 for sell, 1 for buy, 2 for do nothing
+        """
+
+        # define rule for buy
+        # bearish, bulish, bulish
+        buy_rule = [0,1,1]
+
+        # define rule for sell
+        # bulish, bearish, bearish
+        sell_rule = [1,0,0]
+
+        # detected rule buy or sell
+        dected_rule = []
+
+        # detect candle stick pattern from given 3 rows of dataframe
+        for i in range(len(frame)):
+            dected_rule.append(self.candlestick_type(frame.iloc[i, :]))
+
+        # check if detected rule is equal to buy rule
+        if dected_rule == buy_rule:
+
+            # check if the last volume candle greater than second candle
+            # this is must be solve
+            if frame.iloc[-1, :]['Volume'] > frame.iloc[-2, :]['Volume']:
+                return 1
+            else:
+                return 2
+
+        # check if detected rule is equal to sell rule
+        elif dected_rule == sell_rule:
+            return 0
+        else:
+            return 2
+        
+    def test_candle_transaction(self, frame):
+        """
+        Given ohlc data in pandas dataframe
+        then select 3 candle stick and do prediction
+
+        @param: frame: pandas dataframe
+        @return: list of annotation point and list of prediction result
+        """
+
+        n_candle = 3
+
+        # define annotation point
+        annt = []
+
+        # define prediction result
+        prediction = []
+
+        # start sliding 3 sliding window to the right
+        for i in range(len(frame)):
+
+            # select 3 candle
+            selected_candle = frame.iloc[i:n_candle, :]
+
+            # if selected candle is 3 then do prediction
+            if len(selected_candle) == 3:
+
+                # do prediction
+                preds = self.do_transaction(selected_candle)
+
+                if preds == 1 or preds == 0:
+                    annt.append(n_candle)
+                    prediction.append(preds)
+
+            # update n_candle by 1
+            n_candle += 1
+
+        return annt, prediction
