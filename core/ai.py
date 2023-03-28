@@ -141,7 +141,12 @@ class CandleStick:
 
             # check if the last volume candle greater than second candle
             # this is must be solve
-            if frame.iloc[-1, :]['Volume'] > frame.iloc[-2, :]['Volume']:
+            # calculate the difference from the open and close prices
+
+            difference_last = frame.iloc[-1, :]['Close'] - frame.iloc[-1, :]['Open']
+            difference_last_2 = frame.iloc[-2, :]['Close'] - frame.iloc[-2, :]['Open']
+
+            if difference_last > difference_last_2:
                 return 1
             else:
                 return 2
