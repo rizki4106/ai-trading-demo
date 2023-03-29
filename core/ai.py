@@ -1,6 +1,7 @@
 from torchvision import models, transforms
 from PIL import Image
 import torch
+import pandas as pd
 
 class ConfirmModelV1:
     """
@@ -194,3 +195,63 @@ class CandleStick:
             n_candle += 1
 
         return annt, prediction
+
+class SignalConfirmV1:
+    """
+    Merge the ConvirmModelV1 as Signal prediction and Candlestick as a confirmation from the signal
+    """
+
+    def __init__(self, 
+                 confirm_model : ConfirmModelV1, 
+                 candlestick : CandleStick,
+                 device : str) -> None:
+        """
+        Args:
+            confirm_model : ConfirmModelV1 -> confirm model
+            candlestick : CandleStick -> candle stick model
+            device : str -> available device cpu or cuda
+        """
+
+        # initialize confirm model
+        self.confirm_model = confirm_model
+
+        # initialize candlestick model
+        self.candlestick = candlestick
+
+        # initialize device
+        self.device = device
+
+    def predict(self, image : Image, frame : pd.DataFrame):
+        """
+        Predict trend market up or down
+        Args:
+            image : PIL.Image -> chart pattern image
+            frame : pd.DataFrame -> ohlc data
+        Returns:
+            result : dict -> probability, class_int, class_name
+        """
+
+        # predict signal
+        signal = self.confirm_model.predict(image)
+
+        # get the annotation point and prediction result
+        confirmation = self.candlestick.do_transaction(frame)
+
+        if signal['class_int'] == 1 and confirmation == 1:
+            return {
+                "probability": signal['probability'],
+                "class_int": 1,
+                "class_name": "buy"
+            }
+        elif signal['class_int'] == 0 and confirmation == 0:
+            return {
+                "probability": signal['probability'],
+                "class_int": 0,
+                "class_name": "sell"
+            }
+        else:
+            return {
+                "probability": -1,
+                "class_int": 2,
+                "class_name": "do nothing"
+            }
