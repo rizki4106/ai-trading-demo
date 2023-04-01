@@ -1,19 +1,6 @@
 import mplfinance as mf
 import numpy as np
 from PIL import Image
-import pandas as pd
-
-# ml
-from core.controller import  device_diagnostic
-from core.model import initialize_model_v1
-
-# device diagnostic
-device = device_diagnostic()
-
-# initialize trained model
-model_path = "model/model-1.pth"
-model = initialize_model_v1(device=device, saved_weight_path=model_path)
-model.eval()
 
 
 def create_image(data : list = []):

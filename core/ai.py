@@ -2,6 +2,7 @@ from torchvision import models, transforms
 from PIL import Image
 import torch
 import pandas as pd
+import numpy as np
 
 class ConfirmModelV1:
     """
@@ -82,7 +83,7 @@ class ConfirmModelV1:
             idx = preds.argmax().item()
 
             return {
-                "probability": preds[idx],
+                "probability": preds[idx].item(),
                 "class_int": idx,
                 "class_name": self.class_name[idx]
             }
@@ -137,15 +138,16 @@ class CandleStick:
         for i in range(len(frame)):
             dected_rule.append(self.candlestick_type(frame.iloc[i, :]))
 
+        # calculate the difference from the open and close prices
+
+        difference_last = np.absolute(frame.iloc[-1, :]['Open'] - frame.iloc[-1, :]['Close'])
+        difference_last_2 = np.absolute(frame.iloc[-2, :]['Open'] - frame.iloc[-2, :]['Close'])
+
         # check if detected rule is equal to buy rule
         if dected_rule == buy_rule:
 
             # check if the last volume candle greater than second candle
             # this is must be solve
-            # calculate the difference from the open and close prices
-
-            difference_last = frame.iloc[-1, :]['Close'] - frame.iloc[-1, :]['Open']
-            difference_last_2 = frame.iloc[-2, :]['Close'] - frame.iloc[-2, :]['Open']
 
             if difference_last > difference_last_2:
                 return 1
@@ -154,7 +156,10 @@ class CandleStick:
 
         # check if detected rule is equal to sell rule
         elif dected_rule == sell_rule:
-            return 0
+            if difference_last > difference_last_2:
+                return 0
+            else:
+                return 2
         else:
             return 2
         
@@ -255,3 +260,53 @@ class SignalConfirmV1:
                 "class_int": 2,
                 "class_name": "do nothing"
             }
+
+class SignalModelV2:
+    """
+    Detect if the candle stick pattern is true to go up or it's just fake signal
+    """
+
+    def __init__(self, model_true, model_false, device) -> None:
+        """
+        Args:
+            model_true : torch.nn.Module -> model that trained using true data
+            model_false : torch.nn.Module -> model that trained using false data
+            device : str -> available device cpu or cuda
+        """
+
+        # initialize model true
+        self.model_true = model_true
+
+        # initialize model false
+        self.model_false = model_false
+
+        # initialize device
+        self.device = device
+
+    def predict(self, image : Image):
+        """
+        Predict if the candle stick pattern is true to go up or it's just fake signal
+        Args:
+            image : PIL.Image -> chart pattern image
+        Returns:
+            result : list -> [result_true, result_false]
+        """
+        # predict image
+        preds_true = self.model_true.predict(image)
+        preds_false = self.model_false.predict(image)
+
+        #return the result
+        data_true = {
+            "probability": preds_true['probability'],
+            "class_int": preds_true['class_int'],
+            "class_name": preds_true['class_name'],
+            "model": "dilatih dengan data true",
+        }
+        data_false = {
+            "probability": preds_false['probability'],
+            "class_int": preds_false['class_int'],
+            "class_name": preds_false['class_name'],
+            "model": "dilatih dengan data false",
+        }
+
+        return [data_true, data_false]
