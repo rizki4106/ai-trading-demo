@@ -74,11 +74,11 @@ if uploaded_image is not None:
             st.markdown(f"Tidak melakukan aksi karena *probabilitas salah `({res[1]['probability']:.5f})` **>** probabilitas benar `({res[0]['probability']:.5f})`*")
 
 st.markdown("# Back Test")
-st.markdown("Data live `BTC-USD`")
+st.markdown("Data live `EURUSD=X`")
 
 # mengambil data euro usd
 # periode 7 hari dan rentang waktu 15 menit
-data = yf.download("BTC-USD", period="7d", interval="15m")
+data = yf.download("EURUSD=X", period="7d", interval="15m")
 
 # mengambil 50 data terakhir
 data = data.tail(50)

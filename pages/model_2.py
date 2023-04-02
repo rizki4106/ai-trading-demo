@@ -12,7 +12,7 @@ st.markdown("# Model 2")
 st.markdown("Model ini menggunakan turan `IF THEN` untuk memprediksi trend")
 
 # get data
-ticker = yf.Ticker('BTC-USD')
+ticker = yf.Ticker('EURUSD=X')
 data = ticker.history(period="7d", interval="15m").iloc[-150:, :]
 
 
@@ -26,7 +26,7 @@ with st.spinner("Menjalankan prediksi..."):
     # membuat anotasi
     annt_point = annotate(annotation, prediction, data, cs.rule_name)
 
-    st.markdown("BTC-USD periode `7 hari` rentang waktu `15 menit`")
+    st.markdown("EURUSD=X periode `7 hari` rentang waktu `15 menit`")
 
     # plot candle stick kedalam chart
     fig = go.Figure(data=[go.Candlestick(x=data.index,

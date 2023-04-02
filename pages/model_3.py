@@ -16,7 +16,7 @@ st.markdown("Model ini menggunakan gabungan antara model 1 (candle stick 12 bar)
 st.markdown("## Back Test")
 
 # get data
-ticker = yf.Ticker('BTC-USD')
+ticker = yf.Ticker('EURUSD=X')
 data = ticker.history(period="7d", interval="15m").iloc[-50:, :]
 
 # inisialisasi model
@@ -68,7 +68,7 @@ with st.spinner("Menjalankan prediksi..."):
     # create annotation
     annt_point = annotate(annt, result, data, signal.class_name)
 
-    st.markdown("BTC-USD periode `7 hari` rentang waktu `15 menit`")
+    st.markdown("EURUSD=X periode `7 hari` rentang waktu `15 menit`")
 
     # plot candle stick kedalam chart
     fig = go.Figure(data=[go.Candlestick(x=data.index,
